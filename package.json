@@ -1,14 +1,22 @@
 {
   "name": "gulp_1",
   "version": "1.0.0",
+  "private": true,
   "description": "Testes com Gulp",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "http-server -c-1 --cors ./docs",
+    "watch": "gulp watch"
   },
   "author": "",
   "license": "ISC",
+  "config": {
+    "src": "./src",
+    "dest": "./docs"
+  },
   "devDependencies": {
+    "commander": "^2.17.1",
     "gulp": "^3.9.1",
     "gulp-clean-dest": "^0.2.0",
     "gulp-concat": "^2.6.1",
