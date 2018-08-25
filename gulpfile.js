@@ -3,12 +3,14 @@
 var config =          require('./package.json');
 
 var gulp =            require('gulp');
-var minifyCSS =       require('gulp-csso');   // minificar arquivos ".css"
-var uglify =          require('gulp-uglify'); // minificar arquivos ".js"
-var concat =          require('gulp-concat');
-var less =            require('gulp-less');
-var prune =           require('gulp-prune');
-var nunjucksRender =  require('gulp-nunjucks-render');
+var minifyCSS =       require('gulp-csso');     // minificar arquivos ".css"
+var uglify =          require('gulp-uglify');   // minificar arquivos ".js"
+var htmlmin =         require('gulp-htmlmin');  // minificar arquivos ".html"
+var concat =          require('gulp-concat');   // concatenar arquivos de texto
+var less =            require('gulp-less');     // compilar arquivos ".less" para ".css"
+var prune =           require('gulp-prune');    // apagar arquivos de diretórios
+var nunjucksRender =  require('gulp-nunjucks-render');  // compilar arquivos ".njk" para ".html"
+var flatten =         require('gulp-flatten');  // remove os diretórios das 'listas' de arquivos do Gulp
 
 // constantes para uso nas definições (nome de pastas, nomes padrão...)
 var src =   config.config.src;
@@ -31,6 +33,7 @@ function css(){
 }
 function js_dev(){
   return gulp.src([
+    src+'/libs/zepto.js',
     src+'/libs/**/*.js',
     src+'/**/*.js',
   ]).pipe(concat('index.js'));
@@ -38,20 +41,29 @@ function js_dev(){
 function js(){
   return js_dev().pipe(uglify());
 }
-function html(){
-  return gulp.src(src+'/*.+(html|njk|nj|nunjucks)')
+function html_dev(){
+  return gulp.src(src+'/paginas/**/*.+(html|njk|nj|nunjucks|svg)')
               .pipe(nunjucksRender({
-                path: [src]
-              }));
+                path: [src],
+                envOptions: {
+                  noCache: true
+                }
+              }))
+              .pipe(flatten());
+}
+function html(){
+  return html_dev().pipe(htmlmin({collapseWhitespace: true}));
 }
 
 // definir as tarefas no gulp
-gulp.task('clean',   function(){ return clean(); });
-gulp.task('css-dev', function(){ return css_dev().pipe(gulp.dest(dest)); });
-gulp.task('css',     function(){ return css().pipe(gulp.dest(dest)); });
-gulp.task('js-dev',  function(){ return js_dev().pipe(gulp.dest(dest)); });
-gulp.task('js',      function(){ return js().pipe(gulp.dest(dest)); });
-gulp.task('html',    function(){ return html().pipe(gulp.dest(dest)); });
+gulp.task('clean',    function(){ return clean(); });
+gulp.task('css-dev',  function(){ return css_dev().pipe(gulp.dest(dest)); });
+gulp.task('css',      function(){ return css().pipe(gulp.dest(dest)); });
+gulp.task('js-dev',   function(){ return js_dev().pipe(gulp.dest(dest)); });
+gulp.task('js',       function(){ return js().pipe(gulp.dest(dest)); });
+gulp.task('html-dev', function(){ return html_dev().pipe(gulp.dest(dest)); });
+gulp.task('html',     function(){ return html().pipe(gulp.dest(dest)); });
+gulp.task('assets',   function(){ return gulp.src(src+'/assets/**/*', { base: src }).pipe(gulp.dest(dest)); });
 
 // ------------------------------------------------
 
@@ -65,15 +77,12 @@ gulp.task('help', function(){
 });
 gulp.task('default', ['help']);
 
-gulp.task('dev', ['clean', 'css-dev', 'js-dev', 'html']);
-gulp.task('prod', ['clean', 'css', 'js', 'html']);
+gulp.task('dev', ['clean', 'assets', 'css-dev', 'js-dev', 'html-dev']);
+gulp.task('prod', ['clean', 'assets', 'css', 'js', 'html']);
 
 var watchOpts = {
   interval: 700
 };
 gulp.task('watch', function(){
-  //gulp.watch(src+'/**/*.js', watchOpts, ['js-dev']);
-  //gulp.watch(src+'/**/*.+(html|njk|nj|nunjucks)', watchOpts, ['html']);
-  //gulp.watch(src+'/**/*.+(less|css)', watchOpts, ['css-dev']);
-  gulp.watch(src+'/**/*.+(js|html|njk|nj|nunjucks|less|css)', watchOpts, ['dev']);
+  gulp.watch(src+'/**/*', watchOpts, ['dev']);
 });

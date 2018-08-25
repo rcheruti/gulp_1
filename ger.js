@@ -7,19 +7,28 @@ var program = require('commander');
 
 program.version( config.version );
 
+var templateCache = {}; // guardar templates lidos para evitar acessar várias vezes o HD
 var src = config.config.src ;
 
 program
   .command('component <name>')
   .alias('c')
   .description('Cria um componente, que é composto pelos arquivos ".njk", ".js" e ".less".')
+  .option('--no-dir', 'Cria a estrutura de arquivos sem criar o diretório que "empacota" os arquivos')
   .action(function(name, opts){
     var idxFile =   name.lastIndexOf('/') ;
-    var dir =       name.substring(0, idxFile );
-    mkDirByPathSync( src + '/' + dir );
-    fs.writeFileSync( src + '/' + name + '.component.js', '' );
-    fs.writeFileSync( src + '/' + name + '.component.less', '' );
-    fs.writeFileSync( src + '/' + name + '.component.njk', '' );
+    var fileName = name.substring(idxFile + 1, name.length) ;
+    if( opts.dir ){
+      name += '/' + fileName;
+      idxFile =     name.lastIndexOf('/') ;
+    }
+    if( idxFile > -1 ){
+      var dir =     name.substring(0, idxFile );
+      mkDirByPathSync( src + '/' + dir );
+    }
+    fs.writeFileSync( src + '/' + name + '.component.js',   template('template.component.js', { '$fileName': fileName }) );
+    fs.writeFileSync( src + '/' + name + '.component.less', template('template.component.less', { '$fileName': fileName }) );
+    fs.writeFileSync( src + '/' + name + '.component.njk',  template('template.component.njk', { '$fileName': fileName }) );
   })
   ;
   
@@ -29,8 +38,10 @@ program
   .description('Cria um serviço (um arquivo ".js").')
   .action(function(name, opts){
     var idxFile =   name.lastIndexOf('/') ;
-    var dir =       name.substring(0, idxFile );
-    mkDirByPathSync( src + '/' + dir );
+    if( idxFile > -1 ){
+      var dir =     name.substring(0, idxFile );
+      mkDirByPathSync( src + '/' + dir );
+    }
     fs.writeFileSync( src + '/' + name + '.service.js', '' );
   })
   ;
@@ -44,8 +55,24 @@ program.parse(process.argv); // executar
 
 
 
+// ---------------------------------
+// ---  Funções auxiliares
 
-
+function template(name, opts){
+  var templateStr = '';
+  if( name in templateCache ){
+    templateStr = templateCache[ name ];
+  }else{
+    templateStr = fs.readFileSync('./ger-templates/' + name, { encoding: 'utf-8' });
+    templateCache[ name ] = templateCache;
+  }
+  if( opts ){
+    for(var key in opts){
+      templateStr = templateStr.replace(key, opts[ key ]);
+    }
+  }
+  return templateStr;
+}
 
 
 function mkDirByPathSync(targetDir, { isRelativeToScript = false } = {}) {

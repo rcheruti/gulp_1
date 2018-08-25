@@ -4,7 +4,15 @@
   <meta charset="utf-8" />
   <title>{{ title }}</title>
   
-  <script src="index.js"></script>
+  <base href="/" />
+  
+  <script src="index.js" async></script>
   <link type="text/css" href="index.css" rel="stylesheet"/>
 </head>
+{% endmacro %}
+
+{% macro footerTag() %}
+<footer>
+  RCC
+</footer>
 {% endmacro %}

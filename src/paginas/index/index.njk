@@ -1,0 +1,14 @@
+{% import "partes/tags.njk" as hf %}
+
+<!DOCTYPE html>
+<html>
+  {{ hf.headTag(title = "Página principal") }}
+  <body>
+    
+    {% include "partes/quadro-vermelho/quadro-vermelho.njk" %}
+    
+    {% include "partes/menu-direita/menu-direita.component.njk" %}
+    
+    {{ hf.footerTag() }}
+  </body>
+</html>
