@@ -3,8 +3,7 @@ $(function(){
   
   var botaoFechar = component.find('.botao-menu');
   
-  new Hammer(botaoFechar.get(0)).on('tap', function(){
-    console.log('Tap!');
+  botaoFechar.hammer().on('tap', function(ev){
     component.toggleClass('fechado');
   });
   

@@ -34,6 +34,8 @@ function css(){
 function js_dev(){
   return gulp.src([
     src+'/libs/zepto.js',
+    src+'/libs/zepto.jquery.js',
+    src+'/libs/hammer.js',
     src+'/libs/**/*.js',
     src+'/**/*.js',
   ]).pipe(concat('index.js'));

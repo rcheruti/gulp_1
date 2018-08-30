@@ -10,6 +10,8 @@ body {
 body {
   background: url(/assets/parque.jpg) center center;
   background-size: cover;
+  overflow: hidden;
+  box-shadow: 0 0 230px rgba(255, 255, 255, 0.6) inset;
 }
 body footer {
   position: fixed;
@@ -25,40 +27,50 @@ body footer {
 }
 
 #menu-direita {
-  position: fixed;
+  position: absolute;
   right: 0;
   top: 0;
   height: 100%;
   width: 300px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.65);
   border-left: 1px solid #dfdfdf;
   transform: translate(0, 0);
   transition: transform 0.4s ease-out;
+  overflow: hidden;
+  box-shadow: -1px 1px 3px #444;
 }
-#menu-direita.fechado {
-  transform: translate(calc(100% - 40px), 0);
+#menu-direita .img {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: url(/assets/parque.jpg) center right;
+  background-size: cover;
+  filter: blur(6px);
+  opacity: 0.7;
+  transform: translate(0, 0);
+  transition: transform 0.4s ease-out;
 }
 #menu-direita .botao-menu {
+  position: relative;
+  z-index: 2;
   display: block;
   width: 100%;
   height: 40px;
   cursor: pointer;
   border-bottom: 1px solid #dfdfdf;
+  padding-left: 60px;
+  line-height: 40px;
+  font-size: 20px;
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 0 1px 20px #000000;
 }
-
-#pagina1 .quadro {
-  display: inline-block;
-  width: 100px;
-  height: 100px;
-  margin: 5px;
-  transition: transform 0.9s ease-out, box-shadow 0.5s ease-out;
+#menu-direita.fechado {
+  transform: translate(calc(100% - 40px), 0);
 }
-#pagina1 .quadro:hover {
-  box-shadow: 0 2px 25px blueviolet;
-}
-#pagina1 .vermelho {
-  background: red;
-}
-#pagina1 .movimentado {
-  transform: translate(200px, 50px);
+#menu-direita.fechado .img {
+  transform: translate(calc(-100% + 40px), 0);
 }
