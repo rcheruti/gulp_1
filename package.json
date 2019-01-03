@@ -13,7 +13,20 @@
   "license": "ISC",
   "config": {
     "src": "./src",
-    "dest": "./docs"
+    "dest": "./docs",
+    "order": {
+      "js": [
+        "/../node_modules/jquery/dist/jquery.slim.js",
+        "/../node_modules/jquery-mask-plugin/dist/jquery.mask.js",
+        "/../node_modules/hammerjs/hammer.min.js",
+        "/../node_modules/jquery-hammerjs/jquery.hammer.js",
+        "/../node_modules/animejs/anime.js"
+      ],
+      "css": [
+        "/../node_modules/normalize.css/normalize.css",
+        "/libs/estilos.css"
+      ]
+    }
   },
   "devDependencies": {
     "commander": "^2.17.1",
@@ -27,5 +40,13 @@
     "gulp-nunjucks-render": "^2.2.2",
     "gulp-prune": "^0.2.0",
     "gulp-uglify": "^3.0.1"
+  },
+  "dependencies": {
+    "animejs": "^2.2.0",
+    "hammerjs": "^2.0.8",
+    "jquery": "^3.3.1",
+    "jquery-hammerjs": "^2.0.0",
+    "jquery-mask-plugin": "^1.14.15",
+    "normalize.css": "^8.0.1"
   }
 }

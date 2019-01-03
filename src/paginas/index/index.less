@@ -1,9 +1,8 @@
 
+@import '../../libs/_variables.less';
+
 body{
-  background: url(/assets/parque.jpg) center center;
-  background-size: cover;
   overflow: hidden;
-  box-shadow: 0 0 230px rgba(255,255,255, 0.6) inset;
   
   footer{
     position: fixed;
@@ -16,6 +15,11 @@ body{
     text-align: center;
     line-height: 40px;
     letter-spacing: 10px;
+    
+    @media @mediaMobile {
+      &{
+        color: blue;
+      }
+    }
   }
 }
-

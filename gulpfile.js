@@ -16,6 +16,19 @@ var flatten =         require('gulp-flatten');  // remove os diretórios das 'li
 var src =   config.config.src;
 var dest =  config.config.dest; // usar a pasta "/docs" para que o site esteja disponível no GitHub.
 
+// configuração de arquivos que devem ser carregados antes dos demais durante a compilação
+var orderJs =  [];
+var orderCss = [];
+var order =    config.config.order;
+if( order ){
+  if( order.js && order.js.length ){
+    orderJs = order.js.map((v) => src + v);
+  }
+  if( order.css && order.css.length ){
+    orderCss = order.css.map((v) => src + v);
+  }
+}
+
 // ------------------------------------------------
 
 // definir as funções com os tratamentos iniciais de arquivos
@@ -23,22 +36,21 @@ function clean(){
   return gulp.src('').pipe(prune(dest));
 }
 function css_dev(){
-  return gulp.src([
+  var itens = orderCss.concat([
     src+'/libs/**/*.+(less|css)',
     src+'/**/*.+(less|css)'
-  ]).pipe(less()).pipe(concat('index.css'));
+  ]);
+  return gulp.src(itens).pipe(less()).pipe(concat('index.css'));
 }
 function css(){
   return css_dev().pipe(minifyCSS());
 }
 function js_dev(){
-  return gulp.src([
-    src+'/libs/zepto.js',
-    src+'/libs/zepto.jquery.js',
-    src+'/libs/hammer.js',
+  var itens = orderJs.concat([
     src+'/libs/**/*.js',
     src+'/**/*.js',
-  ]).pipe(concat('index.js'));
+  ]);
+  return gulp.src(itens).pipe(concat('index.js'));
 }
 function js(){
   return js_dev().pipe(uglify());
@@ -69,18 +81,26 @@ gulp.task('assets',   function(){ return gulp.src(src+'/assets/**/*', { base: sr
 
 // ------------------------------------------------
 
-// definir as principais tarefas no gulp, as tarefas que estarão "disponíveis" para os
+// definir as principais tarefas no gulp, as tarefas que estarão disponíveis para os
 // usuários executarem
 gulp.task('help', function(){
-  console.log(' Use as tarefas:');
-  console.log(' - clean: para limpar a pasta do build final ("'+dest+'")');
-  console.log(' - dev: para criar os arquivos sem minificar');
-  console.log(' - prod: para criar os arquivos com minificação');
+  let msg = `
+    Forma de uso:
+        gulp { tarefa }
+    
+    Tarefas disponiveis:
+    - clean: para limpar a pasta do build final ('${dest}')
+    - dev:   para compilar os arquivos sem minificar
+    - help:  para mostrar esta ajuda
+    - prod:  para compilar os arquivos com minificação
+    - watch: para iniciar o observador de arquivos para compilação
+  `;
+  console.log(msg);
 });
 gulp.task('default', ['help']);
 
-gulp.task('dev', ['clean', 'assets', 'css-dev', 'js-dev', 'html-dev']);
-gulp.task('prod', ['clean', 'assets', 'css', 'js', 'html']);
+gulp.task('dev',  ['clean', 'assets', 'css-dev', 'js-dev', 'html-dev']);
+gulp.task('prod', ['clean', 'assets', 'css',     'js',     'html']);
 
 var watchOpts = {
   interval: 700

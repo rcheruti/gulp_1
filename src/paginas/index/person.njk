@@ -1,0 +1,12 @@
+{% import "partes/tags.njk" as hf %}
+
+<!DOCTYPE html>
+<html>
+  {{ hf.headTag(title = "Página principal") }}
+  <body>
+    
+    {% include "partes/person-form/person-form.component.njk" %}
+    
+    {{ hf.footerTag() }}
+  </body>
+</html>
