@@ -1,3 +1,7 @@
+
+import * as anime from "animejs" ;
+import * as hammerjs from 'hammerjs';
+
 $(function(){
   var component = $('#menu-direita');
   if( !component.length ) return;
@@ -9,7 +13,8 @@ $(function(){
   
   var lastAnime = null;
   
-  botaoFechar.hammer().on('tap', function(ev){
+  
+  new hammerjs( botaoFechar[0] ).on('tap', function(ev){
     if( lastAnime ) lastAnime.pause();
     component.toggleClass(classFechado);
     if( component.hasClass(classFechado) ){
@@ -20,3 +25,5 @@ $(function(){
   });
   
 });
+
+export let configX = {};

@@ -4,17 +4,19 @@ var config =          require('./package.json');
 
 var gulp =            require('gulp');
 var minifyCSS =       require('gulp-csso');     // minificar arquivos ".css"
-var uglify =          require('gulp-uglify');   // minificar arquivos ".js"
+var uglify =          require('gulp-uglify-es').default; // minificar arquivos ".js"
 var htmlmin =         require('gulp-htmlmin');  // minificar arquivos ".html"
 var concat =          require('gulp-concat');   // concatenar arquivos de texto
 var less =            require('gulp-less');     // compilar arquivos ".less" para ".css"
 var prune =           require('gulp-prune');    // apagar arquivos de diretórios
 var nunjucksRender =  require('gulp-nunjucks-render');  // compilar arquivos ".njk" para ".html"
 var flatten =         require('gulp-flatten');  // remove os diretórios das 'listas' de arquivos do Gulp
+var ts =              require('gulp-typescript'); // compilar Typescript
 
 // constantes para uso nas definições (nome de pastas, nomes padrão...)
 var src =   config.config.src;
 var dest =  config.config.dest; // usar a pasta "/docs" para que o site esteja disponível no GitHub.
+var srcConfig = { allowEmpty: true };
 
 // configuração de arquivos que devem ser carregados antes dos demais durante a compilação
 var orderJs =  [];
@@ -33,30 +35,43 @@ if( order ){
 
 // definir as funções com os tratamentos iniciais de arquivos
 function clean(){
-  return gulp.src('').pipe(prune(dest));
+  return gulp.src(dest, srcConfig).pipe(prune(dest));
 }
 function css_dev(){
   var itens = orderCss.concat([
     src+'/libs/**/*.+(less|css)',
     src+'/**/*.+(less|css)'
   ]);
-  return gulp.src(itens).pipe(less()).pipe(concat('index.css'));
+  return gulp.src(itens, srcConfig).pipe(less()).pipe(concat('index.css'));
 }
 function css(){
   return css_dev().pipe(minifyCSS());
+}
+function ts_dev(){
+  var itens = [
+    src+'/**/*.ts',
+  ];
+  return gulp.src(itens, srcConfig).pipe(ts({
+    noImplicitAny: false ,
+    experimentalDecorators: true ,
+    //experimentalAsyncFunctions: true ,
+    noEmitOnError: false ,
+    module: 'umd',
+    types: ['jquery','hammerjs','animejs']
+  }));
 }
 function js_dev(){
   var itens = orderJs.concat([
     src+'/libs/**/*.js',
     src+'/**/*.js',
   ]);
-  return gulp.src(itens).pipe(concat('index.js'));
+  return gulp.src(itens, srcConfig).pipe(concat('index.js'));
 }
 function js(){
   return js_dev().pipe(uglify());
 }
 function html_dev(){
-  return gulp.src(src+'/paginas/**/*.+(html|njk|nj|nunjucks|svg)')
+  return gulp.src(src+'/paginas/**/*.+(html|njk|nj|nunjucks|svg)', srcConfig)
               .pipe(nunjucksRender({
                 path: [src],
                 envOptions: {
@@ -79,11 +94,13 @@ gulp.task('html-dev', function(){ return html_dev().pipe(gulp.dest(dest)); });
 gulp.task('html',     function(){ return html().pipe(gulp.dest(dest)); });
 gulp.task('assets',   function(){ return gulp.src(src+'/assets/**/*', { base: src }).pipe(gulp.dest(dest)); });
 
+gulp.task('ts',   function(){ return ts_dev().pipe(gulp.dest(dest)); });
+
 // ------------------------------------------------
 
 // definir as principais tarefas no gulp, as tarefas que estarão disponíveis para os
 // usuários executarem
-gulp.task('help', function(){
+gulp.task('help', function(done){
   let msg = `
     Forma de uso:
         gulp { tarefa }
@@ -96,15 +113,16 @@ gulp.task('help', function(){
     - watch: para iniciar o observador de arquivos para compilação
   `;
   console.log(msg);
+  done();
 });
-gulp.task('default', ['help']);
+gulp.task('default', gulp.series('help'));
 
-gulp.task('dev',  ['clean', 'assets', 'css-dev', 'js-dev', 'html-dev']);
-gulp.task('prod', ['clean', 'assets', 'css',     'js',     'html']);
+gulp.task('dev',  gulp.series('clean', 'assets', 'css-dev', 'js-dev', 'html-dev'));
+gulp.task('prod', gulp.series('clean', 'assets', 'css',     'js',     'html'));
 
 var watchOpts = {
   interval: 700
 };
 gulp.task('watch', function(){
-  gulp.watch(src+'/**/*', watchOpts, ['dev']);
+  return gulp.watch(src+'/**/*', watchOpts, ['dev']);
 });
